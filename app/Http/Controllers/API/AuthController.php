@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\API\Traits\PasswordValidationRules;
-use App\Http\Resources\API\UserResource;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Auth;
 use Illuminate\Http\JsonResponse;
@@ -24,7 +24,7 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->failResponse($validator->messages());
+            return $this->failResponse($validator->messages(), 422);
         }
 
         $user = User::create([
@@ -36,7 +36,7 @@ class AuthController extends Controller
         $user->save();
         $user->sendEmailVerificationNotification();
 
-        return new UserResource($user);
+        return $this->successResponse(new UserResource($user), 201);
     }
 
     public function login(Request $request): JsonResponse
@@ -47,7 +47,7 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->failResponse($validator->messages());
+            return $this->failResponse($validator->messages(), 422);
         }
 
         $credentials = request(['email', 'password']);
@@ -65,5 +65,12 @@ class AuthController extends Controller
         $tokenResult = $user->createToken('authToken')->plainTextToken;
 
         return $this->successResponse(['access_token' => $tokenResult, 'token_type' => 'Bearer']);
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return $this->successResponse(null,204);
     }
 }

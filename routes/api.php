@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\UserController;
+use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,13 +16,24 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-// User register
-Route::name('api.')->group(function (){
-    Route::post('/register', [AuthController::class, 'register'])->name('register');
-    Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::name('api.')->group(function () {
+    // Register
+    Route::post('register', [AuthController::class, 'register'])->name('register');
 
-    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-        return $request->user();
+    // Login
+    Route::post('login', [AuthController::class, 'login'])->name('login');
+
+    // Get specific user profile
+    Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
+
+    // Routes for logged-in user
+    Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+
+        // Logout
+        Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+
+        // Get current user profile
+        Route::get('user', [UserController::class, 'me'])->name('user.show');
     });
 });
 

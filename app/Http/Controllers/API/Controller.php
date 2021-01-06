@@ -16,25 +16,25 @@ class Controller extends BaseController
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
     // Format HTTP response in terms of JSend.
-    public function successResponse($data = null): JsonResponse
+    public function successResponse($data = null, $status_code = 200): JsonResponse
     {
         $jsonResponse = ['status' => 'success'];
 
         !$data ?: $jsonResponse['data'] = $data;
 
-        return response()->json($jsonResponse);
+        return response()->json($jsonResponse, $status_code);
     }
 
-    public function failResponse($data = null): JsonResponse
+    public function failResponse($data = null, $status_code = 200): JsonResponse
     {
         $jsonResponse = ['status' => 'fail'];
 
         !$data ?: $jsonResponse['data'] = $data;
 
-        return response()->json($jsonResponse);
+        return response()->json($jsonResponse, $status_code);
     }
 
-    public function errorResponse($message = null, $data = null, $code = null): JsonResponse
+    public function errorResponse($message = null, $status_code = 500, $code = null, $data = null): JsonResponse
     {
         $jsonResponse = ['status' => 'error'];
 
@@ -42,6 +42,6 @@ class Controller extends BaseController
         !$data ?: $jsonResponse['data'] = $data;
         !$code ?: $jsonResponse['code'] = $code;
 
-        return response()->json($jsonResponse);
+        return response()->json($jsonResponse, $status_code);
     }
 }
