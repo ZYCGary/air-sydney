@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Requests\API;
+namespace App\Http\Requests;
 
 use App\Http\Controllers\API\Traits\PasswordValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use JetBrains\PhpStorm\ArrayShape;
 
 class UserRequest extends FormRequest
@@ -15,6 +16,8 @@ class UserRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [];
+        return [
+
+        ];
     }
 }

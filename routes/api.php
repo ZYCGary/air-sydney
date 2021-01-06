@@ -34,6 +34,9 @@ Route::name('api.')->group(function () {
 
         // Get current user profile
         Route::get('user', [UserController::class, 'me'])->name('user.show');
+
+        // Update user profile
+        Route::post('user', [UserController::class, 'update'])->name('user.update');
     });
 });
 
