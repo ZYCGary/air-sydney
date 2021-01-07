@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -18,7 +20,7 @@ class UserController extends Controller
         return $this->successResponse(new UserResource($request->user()));
     }
 
-    public function show($userId, Request $request): JsonResponse
+    public function show($userId): JsonResponse
     {
         try {
             $user = User::findOrFail($userId);
@@ -71,5 +73,22 @@ class UserController extends Controller
         ])->save();
 
         $user->sendEmailVerificationNotification();
+    }
+
+    public function destroy(Request $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+
+            $this->authorize('destroy', $user);
+
+            $user->delete();
+
+            return $this->successResponse(null, 204);
+        }catch (AuthorizationException) {
+            return $this->errorResponse('Forbidden', 403);
+        }catch (Exception) {
+            return $this->errorResponse('Server Error');
+        }
     }
 }
