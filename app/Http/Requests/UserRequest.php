@@ -9,8 +9,6 @@ use JetBrains\PhpStorm\ArrayShape;
 
 class UserRequest extends FormRequest
 {
-    use PasswordValidationRules;
-
     /**
      * @return array
      */

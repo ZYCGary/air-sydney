@@ -17,7 +17,7 @@ class UserController extends Controller
 {
     public function me(Request $request): JsonResponse
     {
-        return $this->successResponse(new UserResource($request->user()));
+        return $this->successResponse(null, null, new UserResource($request->user()), 200);
     }
 
     public function show($userId): JsonResponse
@@ -25,9 +25,9 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($userId);
 
-            return $this->successResponse(new UserResource($user));
+            return $this->successResponse(null, null, new UserResource($user), 200);
         } catch (ModelNotFoundException) {
-            return $this->errorResponse(trans('app.not_found', ['attribute' => 'User']), 404);
+            return $this->errorResponse('not_found', trans('app.errors.not_found', ['attribute' => 'User']));
         }
     }
 
@@ -44,7 +44,7 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->failResponse($validator->messages(), 422);
+            return $this->errorResponse('invalid_input', trans('validation.custom.invalid_input'), $validator->messages());
         }
 
         if (isset($input['photo'])) {
@@ -61,7 +61,7 @@ class UserController extends Controller
             ])->save();
         }
 
-        return $this->successResponse(new UserResource($user));
+        return $this->successResponse('update_success', trans('users.update.success'), new UserResource($user));
     }
 
     protected function updateVerifiedUser($user, array $input)
@@ -84,11 +84,11 @@ class UserController extends Controller
 
             $user->delete();
 
-            return $this->successResponse(null, 204);
-        }catch (AuthorizationException) {
-            return $this->errorResponse('Forbidden', 403);
-        }catch (Exception) {
-            return $this->errorResponse('Server Error');
+            return $this->successResponse('delete_success');
+        } catch (AuthorizationException) {
+            return $this->errorResponse('forbidden', trans('auth.forbidden'));
+        } catch (Exception) {
+            return $this->errorResponse('internal_error', trans('app.errors.internal_error'));
         }
     }
 }

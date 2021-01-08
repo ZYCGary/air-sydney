@@ -1,5 +1,8 @@
 <?php
 
 return [
-  'not_found' => ':attribute not found'
+    'errors' => [
+        'not_found' => ':attribute Not Found',
+        'internal_error' => 'Internal Server Error'
+    ],
 ];
