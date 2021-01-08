@@ -91,6 +91,8 @@ class UserController extends Controller
 
             $user->delete();
 
+            $user->tokens()->delete();
+
             return $this->successResponse('delete_success');
         } catch (AuthorizationException) {
             return $this->errorResponse('forbidden', trans('auth.forbidden'));
