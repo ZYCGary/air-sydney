@@ -20,8 +20,13 @@ class UserPolicy
         //
     }
 
+    public function update(User $currentUser, User $user): bool
+    {
+        return $currentUser->id === $user->id && $currentUser->tokenCan('update');
+    }
+
     public function destroy(User $currentUser, User $user): bool
     {
-        return $currentUser->id === $user->id && $currentUser->tokenCan('server:delete');
+        return $currentUser->id === $user->id && $currentUser->tokenCan('delete');
     }
 }

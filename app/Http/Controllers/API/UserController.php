@@ -33,35 +33,42 @@ class UserController extends Controller
 
     public function update(Request $request): JsonResponse
     {
-        $user = $request->user();
+        try {
+            $user = $request->user();
 
-        $input = $request->only(['name', 'email', 'photo']);
+            $this->authorize('update', $user);
 
-        $validator = Validator::make($input, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'photo' => ['nullable', 'image', 'max:1024'],
-        ]);
+            $input = $request->only(['name', 'email', 'photo']);
 
-        if ($validator->fails()) {
-            return $this->errorResponse('invalid_input', trans('validation.custom.invalid_input'), $validator->messages());
+            $validator = Validator::make($input, [
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+                'photo' => ['nullable', 'image', 'max:1024'],
+            ]);
+
+            if ($validator->fails()) {
+                return $this->errorResponse('invalid_input', trans('validation.custom.invalid_input'), $validator->messages());
+            }
+
+            if (isset($input['photo'])) {
+                $user->updateProfilePhoto($input['photo']);
+            }
+
+            if ($input['email'] !== $user->email &&
+                $user instanceof MustVerifyEmail) {
+                $this->updateVerifiedUser($user, $input);
+            } else {
+                $user->forceFill([
+                    'name' => $input['name'],
+                    'email' => $input['email'],
+                ])->save();
+            }
+
+            return $this->successResponse('update_success', trans('users.update.success'), new UserResource($user));
+        } catch (AuthorizationException) {
+            return $this->errorResponse('forbidden', trans('auth.forbidden'));
         }
 
-        if (isset($input['photo'])) {
-            $user->updateProfilePhoto($input['photo']);
-        }
-
-        if ($input['email'] !== $user->email &&
-            $user instanceof MustVerifyEmail) {
-            $this->updateVerifiedUser($user, $input);
-        } else {
-            $user->forceFill([
-                'name' => $input['name'],
-                'email' => $input['email'],
-            ])->save();
-        }
-
-        return $this->successResponse('update_success', trans('users.update.success'), new UserResource($user));
     }
 
     protected function updateVerifiedUser($user, array $input)
